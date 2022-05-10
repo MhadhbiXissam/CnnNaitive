@@ -57,7 +57,8 @@ class Cnn :
 	def __init__(self,*args) : 
 		self.dims = list(args)
 		self.t_dims = [(self.dims[i] , self.dims[i+1]) for i in range(len(self.dims) - 1 )]
-		#self.layers = [Layer(*i , activation = "tanh") for i in self.t_dims]
+		self.layers = [Layer(*i) for i in self.t_dims]
+		"""
 		self.layers = [
 			Layer(2,2 , w = [[20.0, -20.0],[-20.0,20.0]]  , b = [-10.0 , 30.0]) , 
 			Layer(2 , 1 , w = [[20.0,20.0] ] , b = [-30.0])
@@ -65,16 +66,25 @@ class Cnn :
 		]
 		#self.layers[-1].set_Last_Layer()
 		self.labels = [1,2,3] 
+		"""
+
 
 	def setLabels(self,maplabels = list()) : 
 		self.labels = maplabels 
 
 
-	def calculate(self,x) : 
+	def calculate(self,x,asbool = False , argmax = False ,argmaxlabes = False ) : 
 		y = x.copy()
 		for i in range(len(self.layers)) : 
 			y = self.layers[i].forward(y)
-			print(i,y)
+			#print(i,y)
+		if asbool  : 
+			return np.array([0 if y[i] < 1 - y[i] else 1  for i in range(len(y))])
+		if argmax : 
+			return np.argmax(y)
+		if argmaxlabes : 
+			return self.labels[np.argmax(y)]
+
 		return y
 
 """
@@ -82,6 +92,14 @@ c = Layer(5,6,"soft")
 c.forward(np.array([random.uniform(0, 1) for i in range(0,5)]))
 print(c.out)
 """
+n = 20 
+for k in range( 300) : 
+	c = Cnn(n,20,10)
 
-c = Cnn(2,2,1)
-print(c.calculate(np.array([1.0 ,1.0 ])))
+	c.setLabels(["Class-{0}".format(str(i)) for i in range(n)])
+	x = [random.uniform(0, 1) for i in range(n)]
+
+	v = c.calculate(x, argmaxlabes = True)
+
+	print(v)
+
